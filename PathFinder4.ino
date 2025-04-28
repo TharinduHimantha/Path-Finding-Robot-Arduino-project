@@ -19,7 +19,6 @@ short leftF=6, leftB=7;  // turn right
 short rightF=8, rightB=9;  //turn left
 short pwmPinL=5;
 short pwmPinR=10;
-short startPin;
 
 int baseSpeed1=150;
 
@@ -58,11 +57,11 @@ void setup() {
   pinMode(servoPin2,OUTPUT);
 
   servo1.attach(servoPin1);    //left
-  servo2.attach(servoPin2);
+  //servo2.attach(servoPin2);
   delay(500);
 
   servo1.write(0);
-  servo2.write(180);
+  //servo2.write(180);
   delay(3000);
 
 //Ultrasound related
@@ -91,7 +90,8 @@ void loop() {
     receiveBluetoothInt();
   }
 
-  if( Measure(trigPin2, echoPin2) < 10){
+  if( Measure(trigPin2, echoPin2) < 15){
+      goForward(0, 0);
       correction = Scan();
   }
 
@@ -107,15 +107,15 @@ int PID(int error){
 
 int Scan(){
   int error= 0;
-  for(int c=0; c<=120; c+=5){
+  for(int c=0; c<=180; c+=10){
 
     if(c%30==0){
       servo1.write(c);
-      error += Measure(trigPin2, echoPin2)*c;
+      error += Measure(trigPin2, echoPin2)*(c-90);
       delay(40);
-      servo2.write(180-c);
-      error += Measure(trigPin1, echoPin1)*(-c);
-      delay(40);
+      // servo2.write(180-c);
+      // error += Measure(trigPin1, echoPin1)*(-c);
+      // delay(40);
     }
     else{
       servo1.write(c);
@@ -153,11 +153,11 @@ int Measure(int trigPin, int echoPin){
 void goForward(int baseSpeed, int correction){
 
   analogWrite(pwmPinR, baseSpeed - correction);
-  BTSerial.print("Lefft :");
+  BTSerial.print("Lefft: ");
   BTSerial.println(baseSpeed- correction);
   int speed = (baseSpeed != 0) ? baseSpeed+15 : 0;
   analogWrite(pwmPinL, speed + correction);
-  BTSerial.print("Right :");
+  BTSerial.print("Right: ");
   BTSerial.println(speed + correction);
   
 }
